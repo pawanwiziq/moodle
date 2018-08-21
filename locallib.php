@@ -245,11 +245,26 @@ function wiziq_timezone() {
  */
 
 function wiziq_converttime($timestamp, $timezonerequired) {
-
+  
+    // $date = date('Y-m-d H:i:s', $timestamp);
+    // $date1 = new DateTime($date, new DateTimeZone($timezonerequired) );
+    // $wiziq_class_time = $date;
+    // return $wiziq_class_time;
+    
+    $fromtz =  core_date::get_server_timezone();
     $date = date('Y-m-d H:i:s', $timestamp);
-    $date1 = new DateTime($date, new DateTimeZone($timezonerequired) );
-    $wiziq_class_time = $date;
+    $date1 = new DateTime($date, new DateTimeZone($fromtz));
+    $date1->setTimezone(new DateTimeZone($timezonerequired));
+    $time = $date1->format('Y-m-d H:i:s');   
+    return $time;
+    /*
+    $system_timezone = date_default_timezone_get("Asia/Kolkata");
+    $st = $timestamp;
+    date_default_timezone_set($timezonerequired);
+    $wiziq_class_time = date('Y-m-d H:i:s', $st);
+    date_default_timezone_set($system_timezone);
     return $wiziq_class_time;
+     * */
      
 }
 
@@ -272,8 +287,6 @@ function wiziq_converttime($timestamp, $timezonerequired) {
  */
 function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, &$presenter_name, &$presenter_url, &$start_time, &$time_zone, &$create_recording, &$status, &$language_culture_name, &$duration, &$recording_url) {
     global $CFG , $USER;
-
-
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
     $wiziq_access_key = $CFG->wiziq_access_key;
     $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
@@ -332,7 +345,7 @@ function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, 
             );
             $event = \mod_wiziq\event\wiziq_classdetail::create($params);
             $event->trigger();
-            echo $OUTPUT->notification($e->getMessage()."<br/>".$errormsg);
+         //   echo $OUTPUT->notification($e->getMessage()."<br/>".$errormsg);
          
         }
         } catch (Exception $e) {
@@ -787,6 +800,7 @@ function wiziq_get_data_manageperma($courseid, $wiziq_classmasterid_array, &$wiz
             $attribnode = (string) $xmldata->attributes();
             if ($attribnode == "ok") {
                 $get_data = $xmldata->view_schedule->recurring_list->class_details;
+                $wiziq_classidperma = array();
                 $wiziq_classidperma[] = '';
                 foreach ($get_data as $record) {
                     $wiziq_classidperma[] = $record->class_id;
@@ -899,10 +913,12 @@ function wiziq_get_data_managepermaview($courseid, $wiziq_classmasterid_array, &
         $attribnode = (string) $xmldata->attributes();
         if ($attribnode == "ok") {
             $get_data = $xmldata->view_schedule->recurring_list->class_details;
-          
+
+          $wiziq_classidperma1 = array();
+           $wiziq_recordlink[] = array();
+
             foreach ($get_data as $record) {
                 $wiziq_classidperma1[] = $record->class_id;
-
                 $wiziq_recordlink[] = $record->recording_url;
                 if (isset($record->class_status)) {
                     $classstatus  = (string) $record->class_status;
@@ -1005,11 +1021,15 @@ function wiziq_downloadrecording($courseid, $class_id, &$download_recording_link
                     // if ($download_status == "true") {
                     $rec_statusnode = (string) $download_recording->attributes();
                     if ($rec_statusnode == "true") {
+
                         $status_xml_path[] = (string) $download_recording->status_xml_path;
 
                         wiziq_download_recording($courseid, $class_id, $status_xml_path, $download_rec_link_path, $errormsgdown);
 
+                        $download_recording_link = array();
+
                         if (!empty($download_rec_link_path)) {
+
                             $download_recording_link[] = $download_rec_link_path;
                         } else {
                            $errormsg = get_string('recnotcreatedyet', 'wiziq');  
@@ -1247,7 +1267,6 @@ function wiziq_download_recording($courseid, $class_id, $status_xml_path, &$down
  * @param string $attendancexmlch_attlist attendee's details for attendance report.
  */
 function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$attendancexmlch_dur, &$attendancexmlch_attlist) {
-
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
     $wiziq_access_key = $CFG->wiziq_access_key;
@@ -1262,7 +1281,6 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
     try {
         $xmlreturn = $wiziq_httprequest->wiziq_do_post_request(
                 $wiziq_webserviceurl . '?method=get_attendance_report', $requestparameters);
-
         libxml_use_internal_errors(true);
         $attendancexml = new SimpleXMLElement($xmlreturn);
         $attendancexml_status = $attendancexml->attributes();
@@ -1277,7 +1295,7 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
             $att = 'msg';
             $attribute = (string) $attendancexml->error->attributes()->$att;
             if ($attribute == 'No record found.') {
-                 $attribute = '<b>Course report is in progress. Please check after sometime.</b>';;
+                $attribute = '<b>Course report is in progress. Please check after sometime.</b>';
             } else if ($attribute == 'Attendance report will be available soon.') {
                 $attribute = '<b>We are processing the information for the class. Attendance report will be available soon.</b>';
             }
@@ -1320,6 +1338,53 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
     }
 }
 
+function wiziq_getattendance_course_report($courseid, $class_id, $id, &$errormsg, &$attendancexmlch_dur, &$attendancexmlch_attlist) {
+    global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
+    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
+    $wiziq_access_key = $CFG->wiziq_access_key;
+    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $coursecontext = context_course::instance($courseid);  
+    require_once("authbase.php");
+    $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
+    $method = "get_attendance_report";
+    $requestparameters["signature"] = $wiziq_authbase->wiziq_generatesignature($method, $requestparameters);
+    $requestparameters["class_id"] = $class_id;
+    $wiziq_httprequest = new wiziq_httprequest();
+    try {
+        $xmlreturn = $wiziq_httprequest->wiziq_do_post_request(
+                $wiziq_webserviceurl . '?method=get_attendance_report', $requestparameters);
+        libxml_use_internal_errors(true);
+        $attendancexml = new SimpleXMLElement($xmlreturn);
+        $attendancexml_status = $attendancexml->attributes();
+        if ($attendancexml_status == 'ok') {
+            $attendancexmlch = $attendancexml->get_attendance_report;
+            $attendancexmlch_status = $attendancexmlch->attributes();
+            if ($attendancexmlch_status == 'true') {
+                $attendancexmlch_dur = $attendancexmlch->class_duration;
+                $attendancexmlch_attlist = $attendancexmlch->attendee_list;
+            }
+        } 
+    } catch (Exception $e) {
+        if (property_exists($e, 'errorcode')) {
+            print_error($e->a);
+        } else {
+            $errormsg = get_string('errorinservice', 'wiziq');
+            $params = array(
+                'objectid' => $class_id,
+                'relateduserid' => $USER->id,
+                'courseid' => $courseid,
+                'context' => $coursecontext,
+                'other' => array(
+                    'sesskey' => sesskey(),
+                    'error' => $errormsg
+                )
+            );
+            $event = \mod_wiziq\event\wiziq_classattendance::create($params);
+            $event->trigger();
+            print_error($errormsg);
+        }
+    }
+}
 /**
  * Creates a folder for content uploading for wiziq.
  *
@@ -1768,7 +1833,38 @@ function wiziq_authentication(&$id, &$timekey, &$hash) {
     $timekey = time();
     $key = "key";
     $data = $id + $timekey;
-    $hash = wiziq_encrypt_hash($data, $key);
+    $action = 'encrypt';
+    //$hash = wiziq_encrypt_hash($data, $key);
+    $hash = encrypt_decrypt($action, $data, $key);
+}
+
+/**
+ * This encrypts/decrypts the content that is uploaded,function is called from
+ * wiziq_authentication function.
+ *
+ * @param string $str
+ * @param string $key
+ *
+ * @return string $hashedvalue
+ */
+
+function encrypt_decrypt($action, $string, $key) {
+    $output = false;
+    $encrypt_method = "AES-256-CBC";
+    $secret_key = $key;
+    $secret_iv = $key.'cont_enc_dec';
+    // hash
+    $key = hash('sha256', $secret_key);
+    
+    // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+    $iv = substr(hash('sha256', $secret_iv), 0, 16);
+    if ( $action == 'encrypt' ) {
+        $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
+        $output = base64_encode($output);
+    } else if( $action == 'decrypt' ) {
+        $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+    }
+    return $output;
 }
 
 /**
@@ -1781,14 +1877,11 @@ function wiziq_authentication(&$id, &$timekey, &$hash) {
  * @return string $hashedvalue
  */
 function wiziq_encrypt_hash($str, $key) {
-    // Remove the base64 encoding from our key
-    $encryption_key = base64_decode($key);
-    // Generate an initialization vector
-    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-    // Encrypt the data using AES 256 encryption in CBC mode using our encryption key and initialization vector.
-    $encrypted = openssl_encrypt($str, 'aes-256-cbc', $encryption_key, 0, $iv);
-    // The $iv is just as important as the key for decrypting, so save it with our encrypted data using a unique separator (::)
-    $hashedvalue = base64_encode($encrypted . '::' . $iv);
+    $block = mcrypt_get_block_size('des', 'ecb');
+    $pad = $block - (strlen($str) % $block);
+    $str .= str_repeat(chr($pad), $pad);
+    $encodestring = base64_encode(mcrypt_encrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB));
+    $hashedvalue = urlencode($encodestring);
     return $hashedvalue;
 }
 
@@ -1801,11 +1894,20 @@ function wiziq_encrypt_hash($str, $key) {
  * @return string $var4
  */
 function wiziq_decrypt_hash($strh, $key) {
-     // Remove the base64 encoding from our key
-    $encryption_key = base64_decode($key);
-    // To decrypt, split the encrypted data from our IV - our unique separator used was "::"
-    list($encrypted_data, $iv) = explode('::', base64_decode($strh), 2);
-    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $encryption_key, 0, $iv);
+    $plus = preg_match("/\+/i", $strh);
+    if ($plus) {
+        $str1 = $strh;
+    } else {
+        $str1 = urldecode($strh);
+    }
+    $str = base64_decode($str1);
+    $str2 = mcrypt_decrypt(MCRYPT_DES, $key, $str, MCRYPT_MODE_ECB);
+    $block = mcrypt_get_block_size('des', 'ecb');
+    $pad = ord($str2[($len = strlen($str2)) - 1]);
+    $strlen = strlen($str2);
+    $var2 = substr($str2, 0, strlen($str2) - $pad);
+    $var4 = $var2;
+    return $var4;
 }
 
 /**
@@ -2355,9 +2457,6 @@ function wiziq_addattendeeperma($courseid, $class_master_id, $attendee_id, $atte
 }
 
 //end function
-
-
-
 /*
  * 
  * 
@@ -2434,18 +2533,13 @@ function wiziq_modifypermaclass($courseid, $wiziq_secretacesskey, $wiziq_access_
 }
 
 //end function
-
-
 /*
  * 
  * 
  *  Wiziq Cancle Perma Class Method
  * 
  */
-
 function wiziq_delete_permaclass($courseid, $class_master_id, $permaclass) {
-
-
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
     $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
@@ -2489,7 +2583,7 @@ function wiziq_delete_permaclass($courseid, $class_master_id, $permaclass) {
  * Create Recurring Class
  */
 
-function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $monthly_date, $days_of_week, $specific_week, &$wiz_start_time, &$wiziq_presenter_link, $time_zone, $duration, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $start_time, $class_repeat_type, $class_occurrence, $class_end_date, $language_culture_name, $courseid, $intro, $presenter_id, $presenter_name, $recording, &$attribnode, &$wiziqmasterclass_id, &$wiziqclass_id, &$errormsg, &$view_recording_url) {
+function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $monthly_date, $days_of_week, $specific_week, &$wiz_start_time =array(), &$wiziq_presenter_link = array(), $time_zone, $duration, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $start_time, $class_repeat_type, $class_occurrence, $class_end_date, $language_culture_name, $courseid, $intro, $presenter_id, $presenter_name, $recording, &$attribnode, &$wiziqmasterclass_id, &$wiziqclass_id, &$errormsg, &$view_recording_url = array()) {
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $USER;
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
@@ -2549,6 +2643,7 @@ function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $mo
             $class_detaial = $objdom->create_recurring->recurring_class_details;
             $wiziqmasterclass_id = (string) $class_detaial->class_master_id;
             wiziq_view_recur_class($courseid, $wiziqmasterclass_id, $wiziq_classidmaster, $wiziq_recordlink, $wiziq_presenter_link, $wiz_start_time);
+            $wiziqclass_id = array();
             $wiziqclass_id[] = $wiziq_classidmaster;
             $view_recording_url[] = $wiziq_recordlink;
             $wiziq_presenter_link[] = $wiziq_presenter_link;
@@ -2591,9 +2686,8 @@ function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $mo
  *  Recurring View Schedule 
  */
 
-function wiziq_view_recur_class($courseid, $wiziq_classmasterid_array, &$wiziq_classidmaster, &$wiziq_recordlink, &$wiziq_presenter_link, &$wiz_start_time) {
+function wiziq_view_recur_class($courseid, $wiziq_classmasterid_array, &$wiziq_classidmaster, &$wiziq_recordlink = array(), &$wiziq_presenter_link = array(), &$wiz_start_time = array()) {
     global $CFG , $USER;
-
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
     $wiziq_access_key = $CFG->wiziq_access_key;
     $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
@@ -2608,13 +2702,13 @@ function wiziq_view_recur_class($courseid, $wiziq_classmasterid_array, &$wiziq_c
     try {
         $xmlreturn = $wiziq_httprequest->wiziq_do_post_request(
                 $wiziq_webserviceurl . '?method=view_schedule', $requestparameters);
-
         libxml_use_internal_errors(true);
         $xmldata = new SimpleXmlElement($xmlreturn, LIBXML_NOCDATA);
         $attribnode = (string) $xmldata->attributes();
         if ($attribnode == "ok") {
             $get_data = $xmldata->view_schedule->recurring_list->class_details;
-            foreach ($get_data as $record) {
+            $wiziq_classidmaster = array();
+            foreach ($get_data as $record) { 
                 $wiziq_classidmaster[] = $record->class_id;
                 $wiziq_recordlink[] = $record->recording_url;
                 $wiziq_presenter_link[] = $record->presenter_list->presenter->presenter_url;
