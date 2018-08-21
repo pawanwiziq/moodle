@@ -101,7 +101,6 @@ $navigationtabsmanage = new moodle_url("$CFG->wwwroot/mod/wiziq/index.php",
         array('id' =>  $course->id, 'sesskey' => sesskey()));
 $navigationtabscontent = new moodle_url("$CFG->wwwroot/mod/wiziq/content.php",
         array('id' => $course->id, 'sesskey' => sesskey()));
-$navigationtabscoursereport = new moodle_url("$CFG->wwwroot/mod/wiziq/course_report.php", array('id' => $course->id, 'p_id'=>'1', 'sesskey' => sesskey()));
 
 $tabs =array();
 $row = array();
@@ -112,9 +111,6 @@ $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage,
         get_string('manage_classes', 'wiziq'));
 $row[] = new tabobject('wizq_mange_content', $navigationtabscontent,
         get_string('manage_content', 'wiziq'));
-$row[] = new tabobject('wizq_course_report', $navigationtabscoursereport,
-        get_string('course_report', 'wiziq'));
-
 
 $tabs[]=$row;
 print_tabs($tabs);
