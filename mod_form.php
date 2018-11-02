@@ -67,7 +67,7 @@ class mod_wiziq_mod_form extends moodleform_mod {
         $table_html_p2 = '<th>' . $navigation_tabs_manage . '</th><th>|</th>';
         $table_html_p3 = '<th>' . $navigation_tabs_content . '</th>';
         $table_html = $table_html_p1 . $table_html_p2 . $table_html_p3;
-        $update = optional_param('update',null,PARAM_RAW);
+        $update = optional_param('update',null,PARAM_INT);
         $allrecord = $DB->get_record('course_modules', array('id' => $update));
         $allrecord1 = $DB->get_record('wiziq', array('id' => $allrecord->instance));
          // $PAGE->requires->jquery();

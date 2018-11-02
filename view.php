@@ -45,6 +45,7 @@ if ($id) {
 }
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
+
 $noerror = get_string('noerror','wiziq');
 $params = array(
     'objectid' => $wiziq->class_id,
@@ -282,7 +283,7 @@ if ($statusmsg == 'upcoming') {
     $download_recording = get_string('download_recording', 'wiziq');
     $view_recording = get_string('view_recording', 'wiziq');
 
-    wiziq_get_data_managepermaview($course->id, $wiziq->class_master_id, $wiziq_classidperma1);
+    wiziq_get_data_managepermaview($course->id, $wiziq->class_master_id, $wiziq_classidperma1, $classstatus , $presenter_url , $presenter_id , $recording_url);
 
     if ($session == -1) {
         foreach ($wiziq_recordlink as $recordinglink) {
@@ -316,7 +317,7 @@ if (is_array($download_recording_link)) {
                     // send email
                     if($eailnotify == 1)
                     {                       
-                    $emails = get_email($wiziq->course, $wiziq->presenter_id);
+                    $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
                     
                    foreach ($emails['user'] as $email) { //for user
                         $user_email = $email->email;
@@ -474,6 +475,7 @@ if ((is_siteadmin()) || ($presenter_id == $USER->id)) {
         $hascapatt = has_capability('mod/wiziq:view_attendance_report', $context);
         $hascapdwnrec = has_capability('mod/wiziq:wiziq_download_rec', $context);
         $hascapvwrec = has_capability('mod/wiziq:wiziq_view_rec', $context);
+
         if ($hascapatt && $hascapdwnrec && $hascapvwrec) {
             if ($session != -1) {
                 $buttonrow->cells = array($buttonrowcell_3, $buttonrowcell_4,
@@ -609,7 +611,7 @@ if ($wiziq->insescod == '-1') {
                         $DB->update_record('wiziq', $p_sequence);
                 if($eailnotify == 1)
                 {
-                        $emails = get_email($wiziq->course, $wiziq->presenter_id);
+                        $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
                         foreach ($emails['user'] as $email) { //for user
                             $txt = "Perma download link available";
                             email_to_user($email, $USER, "Perma download link available for user", $txt);            
@@ -625,7 +627,7 @@ if ($wiziq->insescod == '-1') {
                         // send email
                        if($eailnotify== 1)
                        {
-                        $emails = get_email($wiziq->course, $wiziq->presenter_id);
+                        $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
                         foreach ($emails['user'] as $email) { //for user
                             $txt = "Perma download link available";
                             email_to_user($email, $USER, "Perma download link available for user", $txt);  

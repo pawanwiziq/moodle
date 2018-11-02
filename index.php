@@ -57,6 +57,7 @@ $PAGE->set_pagelayout('incourse');
 $PAGE->set_context($coursecontext);
 $PAGE->requires->js('/mod/wiziq/js/jquery-latest.js');
 $PAGE->requires->js('/mod/wiziq/js/jquery.tablesorter.js');
+$PAGE->requires->js('/mod/wiziq/js/custom.js');
 $course_number = $course->id;
 
 #-----this function get all the data regarding the wiziq class, including cm id's----
@@ -528,79 +529,4 @@ $table->finish_output();
 echo $OUTPUT->footer();
 
 ?>
-<style>
-    
-table.flexible {
-    font-size: 9pt;
-    margin: 10px 0 15px;
-    text-align: left;
-    width: 100%;
-}
 
-table.flexible thead tr .header {
-    background-image: url("pix/bg.gif");
-    background-position: right center;
-    background-repeat: no-repeat;
-    cursor: pointer;
-}
-table.flexible tbody td {
-
-    vertical-align: top;
-}
-
-table.flexible thead tr .headerSortUp {
-    background-image: url("pix/asc.gif");
-}
-table.flexible thead tr .headerSortDown {
-    background-image: url("pix/desc.gif");
-}
-
-
-    </style>
-
-<script type="text/javascript">
-	
-	
-$(function() {
-		$("table").tablesorter({debug: true})
-		$("a.append").click(appendData);
-		
-		
-	});
-	
-	var lastStudent = 23;
-	var limit = 500;
-	
-	function appendData() {
-		
-		var tdTagStart = '<td>';
-		var tdTagEnd = '</td>';
-		//var sex = ['male','female'];
-		//var major = ['Mathematics','Languages'];
-		
-		
-		for(var i = 0; i < limit; i++) { 
-			var rnd = i % 2;
-			var row = '<tr>';	
-						
-			row += tdTagStart +  randomNumber() + tdTagEnd;
-			row += tdTagStart +  randomNumber() + tdTagEnd;
-			row += tdTagStart +  randomNumber() + tdTagEnd;
-			row += tdTagStart +  randomNumber() + tdTagEnd;
-			
-			row += '</tr>';
-			
-			$("table/tbody:first").append(row);
-			
-		};
-		
-		
-		$("table").trigger('update');
-		return false;
-	}
-	
-	function randomNumber() {
-		return Math.floor(Math.random()*101)
-	}
-	
-	</script>
