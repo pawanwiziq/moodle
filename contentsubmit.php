@@ -153,11 +153,8 @@ if ((!empty($foldersubmit)) && (!empty($foldername))) {
     }
     #--------------------delete file/folder logic-----------------------------
 } else if ($action == WIZIQ_DELETE) {
-    
-    //$decryptedhash = wiziq_decrypt_hash($hash, $key);
-    $decryptedhash = encrypt_decrypt('decrypt', $hash, $key);
+    $decryptedhash = wiziq_decrypt_hash($hash, $key);
     if (($deleteid + $timekey) == $decryptedhash) {
-
         $content = $DB->get_record('wiziq_content', array('id' => $deleteid), '*', MUST_EXIST);
         $empty_folder = $DB->get_records('wiziq_content', array('parentid' => $deleteid));
         $parent_for_deleted = $content->parentid;

@@ -23,6 +23,7 @@
     background-repeat: no-repeat;
     cursor: pointer;
 }
+
 #page-mod-wiziq-index table.flexible tbody td {
 
     vertical-align: top;
@@ -32,5 +33,30 @@
     background-image: url("pix/asc.gif");
 }
 #page-mod-wiziq-index table.flexible thead tr .headerSortDown {
+    background-image: url("pix/desc.gif");
+}
+
+table.flexible {
+    font-size: 9pt;
+    margin: 10px 0 15px;
+    text-align: left;
+    width: 100%;
+}
+
+table.flexible thead tr .header {
+    background-image: url("pix/bg.gif");
+    background-position: right center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+table.flexible tbody td {
+
+    vertical-align: top;
+}
+
+table.flexible thead tr .headerSortUp {
+    background-image: url("pix/asc.gif");
+}
+table.flexible thead tr .headerSortDown {
     background-image: url("pix/desc.gif");
 }

@@ -71,18 +71,13 @@ function wiziq_supports($feature) {
  */
 function wiziq_add_instance(stdClass $wiziq, mod_wiziq_mod_form $mform = null) {
 
-
-
     global $CFG, $DB, $USER;
     $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
     $wiziq_access_key = $CFG->wiziq_access_key;
     $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-$coursecontext = context_course::instance($wiziq->course);
+    $coursecontext = context_course::instance($wiziq->course);
 
-    
     $isadmin = get_admins();
-   
-    
 
     $wiziq->timecreated = time();
 
@@ -96,8 +91,6 @@ $coursecontext = context_course::instance($wiziq->course);
             $wiziq->wiziq_datetime =  strtotime($time);
         }
     }
-
-
 
     if (property_exists($wiziq, 'scheduleforother')) {
         if ($wiziq->scheduleforother == true) {
@@ -140,7 +133,6 @@ $coursecontext = context_course::instance($wiziq->course);
 
   $emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
   $eailnotify = $emailnotification->value;
-
     #-----Schedule class
     if ($wiziq->class_type == 1) {
 
@@ -149,9 +141,9 @@ $coursecontext = context_course::instance($wiziq->course);
         $presenter_id = $userid;
         $presenter_name = $username;
         if (property_exists($wiziq, 'schedule_for_now')) {
-        if ($wiziq->schedule_for_now == true) {
-            $wiziq_datetime = $time;    
-        }
+            if ($wiziq->schedule_for_now == true) {
+                $wiziq_datetime = $time;    
+            }
         }else {
             $wiziq_datetime = wiziq_converttime($wiziq->wiziq_datetime, $wiziq->wiziq_timezone);    
         }
@@ -184,7 +176,7 @@ $coursecontext = context_course::instance($wiziq->course);
         if($eailnotify == 1)
             {
               // send email
-             $emails = get_email($wiziq->course, $presenter_id);
+             $emails = wiziq_get_email($wiziq->course, $presenter_id);
              $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
              $class_datetime = $class_date ." ". $wiziqtimezone ;
          
@@ -195,17 +187,17 @@ $coursecontext = context_course::instance($wiziq->course);
                 $txt .= "You have been invited to attend a live class. Refer to the details of the class below.";
                 $txt .= "<h3>Class Details:</h3>";
                 $txt .="<b>Instructor: </b>" .$emails['teacher']->email ;
-        $txt .="<br>";
-                        $txt .="<b>Title: </b>". $title;
-        $txt .="<br>";
-                        $txt .="<b>Date & Time:</b> ". $class_datetime;
-        $txt .="<br>";
-                        $txt .="<b><a href='$classlink1'> class link </a></b>";
-        $txt .="<br>";
-                        $txt .="<p>You will need a headset and a microphone for audio interaction.</p>";
-        $txt .="<br>";
-                        $txt .="Sincerely,";
-        $txt .="<br>";
+                $txt .="<br>";
+                                $txt .="<b>Title: </b>". $title;
+                $txt .="<br>";
+                                $txt .="<b>Date & Time:</b> ". $class_datetime;
+                $txt .="<br>";
+                                $txt .="<b><a href='$classlink1'> class link </a></b>";
+                $txt .="<br>";
+                                $txt .="<p>You will need a headset and a microphone for audio interaction.</p>";
+                $txt .="<br>";
+                                $txt .="Sincerely,";
+                $txt .="<br>";
                 $txt .= $isadmin[2]->firstname ." ".$isadmin[2]->lastname;
                  $subject = "An invitation to join a live, online class";
                  $finalmessgae = html_to_text($txt);
@@ -309,7 +301,7 @@ $coursecontext = context_course::instance($wiziq->course);
             if($eailnotify == 1)
             {
               // send email
-             $emails = get_email($wiziq->course, $presenter_id);
+             $emails = wiziq_get_email($wiziq->course, $presenter_id);
              $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
              $class_datetime = $class_date ." ". $wiziqtimezone ;
               $classlink1 =$CFG->wwwroot."/mod/wiziq/view.php?id=". $wiziq->coursemodule;
@@ -388,6 +380,7 @@ $coursecontext = context_course::instance($wiziq->course);
     }
     #-----Recurring Class-----
     else {
+
         $title = $wiziq->name;
         if (property_exists($wiziq, 'schedule_for_now')) {
         if ($wiziq->schedule_for_now == true) {
@@ -405,9 +398,9 @@ $coursecontext = context_course::instance($wiziq->course);
         $presenter_id = $userid;
         $presenter_name = $username;
         $attribnode = '';
-        $wiziqmasterclass_id = '';
-        $wiziqclass_id = '';
-        $errormsg = '';
+        $wiziqmasterclass_id = array();
+        $wiziqclass_id = array();
+        $errormsg = array();
         $time_zone = $wiziq->wiziq_timezone;
         $duration = $wiziq->duration;
         $days_of_week = $wiziq->days_of_week;
@@ -415,8 +408,8 @@ $coursecontext = context_course::instance($wiziq->course);
         $monthly_date = $wiziq->monthly_date;
         $class_schedule = $wiziq->class_schedule;
         $select_monthly_repeat_type = $wiziq->select_monthly_repeat_type;
-
         wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $monthly_date, $days_of_week, $specific_week, $wiz_start_time, $wiziq_presenter_link, $time_zone, $duration, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $start_time, $class_repeat_type, $class_occurrence, $class_end_date, $language_culture_name, $courseid, $intro, $presenter_id, $presenter_name, $recording, $attribnode, $wiziqmasterclass_id, $wiziqclass_id, $errormsg, $view_recording_url);
+    
         if ($attribnode == "ok") {
             $i = 0;
             $count = count($wiziqclass_id['0']);
@@ -447,7 +440,7 @@ $coursecontext = context_course::instance($wiziq->course);
                 if($eailnotify == 1)
             {
                  // send email
-             $emails = get_email($wiziq->course, $wiziq->presenter_id);
+             $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
              $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
              $class_datetime = $class_date ." ". $wiziqtimezone ;
               $classlink1 =$CFG->wwwroot."/mod/wiziq/view.php?id=". $wiziq->coursemodule;
@@ -684,7 +677,7 @@ function wiziq_update_instance($wiziq) {
                 if($eailnotify == 1)
             {
                 // send email
-                $emails = get_email($wiziq->course, $presenter_id);
+                $emails = wiziq_get_email($wiziq->course, $presenter_id);
                 $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
                 $class_datetime = $class_date ." ". $wiziqtimezone ;
                 $classlink1 =$CFG->wwwroot."/mod/wiziq/view.php?id=". $wiziq->coursemodule;
@@ -796,7 +789,7 @@ function wiziq_update_instance($wiziq) {
                 if($eailnotify == 1)
             {
                 // send email
-                $emails = get_email($wiziq->course, $presenter_id);
+                $emails = wiziq_get_email($wiziq->course, $presenter_id);
                 $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
                 $class_datetime = $class_date ." ". $wiziqtimezone ;
                 $classlink1 =$CFG->wwwroot."/mod/wiziq/view.php?id=". $wiziq->coursemodule;
@@ -923,7 +916,7 @@ function wiziq_delete_instance($id) {
        if($eailnotify == 1)
         {
         // send email
-        $emails = get_email($wiziq->course, $wiziq->presenter_id);
+        $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
         $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
         $class_datetime = $class_date ." ". $wiziqtimezone ;
         foreach ($emails['user'] as $email) { //for user
@@ -954,8 +947,8 @@ function wiziq_delete_instance($id) {
         wiziq_delete_class($wiziq->course, $wiziq->class_id);
         if($eailnotify == 1)
         {        
-// send email
-        $emails = get_email($wiziq->course, $wiziq->presenter_id);
+        // send email
+        $emails = wiziq_get_email($wiziq->course, $wiziq->presenter_id);
         $class_date = date("l, F d y h:i:s", strtotime($wiziq_datetime));
              $class_datetime = $class_date ." ". $wiziqtimezone ;
         foreach ($emails['user'] as $email) { //for user
