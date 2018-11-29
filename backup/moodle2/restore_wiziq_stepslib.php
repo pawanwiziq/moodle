@@ -43,6 +43,8 @@ class restore_wiziq_activity_structure_step extends restore_activity_structure_s
 
         $paths[] = new restore_path_element('wiziq', '/activity/wiziq');
         $paths[] = new restore_path_element('event', '/activity/wiziq/event');
+        $paths[] = new restore_path_element('recording_details', '/activity/wiziq/recording_details');
+        $paths[] = new restore_path_element('download_details', '/activity/wiziq/download_details');
         if ($userinfo) {
             $paths[] = new restore_path_element('content',
                                                 '/activity/wiziq/usercontents/usercontent');
@@ -104,6 +106,24 @@ class restore_wiziq_activity_structure_step extends restore_activity_structure_s
         if (!$recordexist) {
             $newitemid = $DB->insert_record('wiziq_content', $data);
         }
+    }
+    protected function process_recording_details($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        $newitemid = $DB->insert_record('recording_details', $data);
+        $this->set_mapping('recording_details', $oldid, $newitemid);
+    }
+    protected function process_download_details($data) {
+        global $DB;
+
+        $data = (object)$data;
+        $oldid = $data->id;
+
+        $newitemid = $DB->insert_record('download_details', $data);
+        $this->set_mapping('download_details', $oldid, $newitemid);
     }
     /**
      * Executing activities.

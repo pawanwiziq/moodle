@@ -41,10 +41,10 @@ class backup_wiziq_activity_structure_step extends backup_activity_structure_ste
 
         // Define each element separated
         $wiziq = new backup_nested_element('wiziq', array('id'), array(
-            'insescod', 'class_id', 'name', 'intro', 'introformat',
+            'course', 'insescod', 'class_id', 'name', 'intro', 'introformat',
             'wiziq_datetime', 'class_timezone', 'timecreated', 'timemodified', 'duration',
             'vc_language', 'recording', 'presenter_id', 'lasteditorid',
-            'class_status', 'recording_link', 'view_recording_link', 'recording_link_status'));
+            'class_status', 'recording_link', 'view_recording_link', 'recording_link_status','class_master_id','presenter_url','common_perma_attendee_url','attendee_limit','wiziq_recur_class_repeat_type','class_schedule','class_occurrence','assesstimefinish','specific_week','days_of_week','select_monthly_repeat_type','monthly_date','download_count','recording_count'));
         // Build the tree
         $event = new backup_nested_element('event');
         $event = new backup_nested_element('event', array('id'), array(
@@ -53,15 +53,24 @@ class backup_wiziq_activity_structure_step extends backup_activity_structure_ste
             'timeduration', 'visible', 'uuid', 'sequence', 'timemodified'));
 
         $usercontents = new backup_nested_element('usercontents');
-
         $usercontent = new backup_nested_element('usercontent', array('id'),
                 array('course', 'wiziqid', 'type', 'name',
                       'title', 'parentid', 'prevparentid', 'path',
                       'userid', 'uploadtime', 'contentid', 'old_content_id', 'cid_change_status',
                       'status', 'wcid'));
 
+        $download_details = new backup_nested_element('download_details');
+        $download_details = new backup_nested_element('download_details', array('id'),
+                array('class_id', 'username', 'time'));
+
+        $recording_details = new backup_nested_element('recording_details');
+        $recording_details = new backup_nested_element('recording_details', array('id'),
+                array('class_id', 'username', 'time'));
+
         $wiziq->add_child($event);
         $wiziq->add_child($usercontents);
+        $wiziq->add_child($download_details);
+        $wiziq->add_child($recording_details);
         $usercontents->add_child($usercontent);
         // Define sources
         $wiziq->set_source_table('wiziq', array('id' => backup::VAR_ACTIVITYID));
@@ -71,6 +80,10 @@ class backup_wiziq_activity_structure_step extends backup_activity_structure_ste
             $usercontent->set_source_sql('SELECT * FROM {wiziq_content} where course = ?',
                                          array('course' => backup::VAR_COURSEID));
         }
+        $download_details->set_source_sql('SELECT * FROM {download_details}',
+                                         array('classid' => backup::VAR_CLASSID));
+        $recording_details->set_source_sql('SELECT * FROM {recording_details}',
+                                         array('classid' => backup::VAR_CLASSID));
         // Define id annotations
         $usercontent->annotate_ids('user', 'userid');
         // Define file annotations
