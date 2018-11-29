@@ -55,11 +55,8 @@ if ($ADMIN->fulltree) {
    $str = '<center><img src="'.$CFG->wwwroot.'/mod/wiziq/pix/wiziq-logo.gif"/></center><br />';
     $settings->add(new admin_setting_heading('wiziq_logo', '', $str));
     $settings->add(new admin_setting_heading('wiziq_desc', 'Build. No : M33WZQ1482278400', get_string('setting_discription', 'wiziq')));
+
+
+    $PAGE->requires->jquery();
 }
-
-//$PAGE->requires->js('/mod/wiziq/js/jquerymain.js');
-
-$PAGE->requires->jquery();
-//$PAGE->requires->js_init_call('M.mod_wiziq.init');
-?>
 

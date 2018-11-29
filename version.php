@@ -29,7 +29,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018092900;        // If version == 0 then module will not be installed
+$plugin->version   = 2018111500;        // If version == 0 then module will not be installed
 $plugin->requires  = 2015111000;      // Requires this Moodle version
 $plugin->cron      = 0;               // Period for cron to check this module (secs)
 $plugin->component = 'mod_wiziq'; // To check on upgrade, that module sits in correct place

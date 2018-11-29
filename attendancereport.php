@@ -47,8 +47,7 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $wiziqclass = $DB->get_record('wiziq',
 array('class_id' => $class_id, 'course' => $id), '*', IGNORE_MULTIPLE);
 require_course_login($course);
-$cm = get_coursemodule_from_id('wiziq', $id, 0, false, MUST_EXIST);
-$context = context_module::instance($cm->id);
+
 $coursecontext = context_course::instance($course->id);
 $noerror = get_string('noerror','wiziq');
 $params = array(
@@ -72,104 +71,104 @@ $PAGE->set_title(format_string($pagetitle->name));
 $wiziq_attendancereport = get_string('wiziq_attendancereport', 'wiziq');
 $att_rep_title = $wiziq_attendancereport." ".$wiziqclass->name;
 $PAGE->set_heading(format_string($att_rep_title));
-$PAGE->set_context($context);
 $PAGE->set_pagelayout('incourse');
-$course_number = $course->id;
-wiziq_getattendancereport($id, $class_id, $id, $errormsg,
-$attendancexmlch_dur, $attendancexmlch_attlist);
-
 echo $OUTPUT->header();
-#------- Creation of table starts------
+$course_number = $course->id;
+wiziq_getattendancereport($id, $class_id, $id, $errormsg, $attendancexmlch_dur, $attendancexmlch_attlist);
+if($errormsg){
+    print_error($errormsg);
+}else{
+    $cm = get_coursemodule_from_id('wiziq', $id, 0, false, MUST_EXIST);
+    $context = context_module::instance($cm->id);
+    $PAGE->set_context($context);
 
-$hascapatts = has_capability('mod/wiziq:download_attendance_report', $context);
-if($hascapatts){
+    #------- Creation of table starts------
+    $hascapatts = has_capability('mod/wiziq:download_attendance_report', $context);
+    if($hascapatts){
 
-    $table = new flexible_table('attendenreport');
-    $table->define_columns(array('name', 'entry_time', 'exit_time',
-        'attended_minutes'));
-    $table->column_style_all('text-align', 'left');
-    $table->define_headers(array(get_string('attendee_name', 'wiziq'),
-        get_string('entry_time', 'wiziq'), get_string('exit_time', 'wiziq'),
-        get_string('attended_minutes', 'wiziq'),
-       ));
-    $table->define_baseurl($PAGE->url);
-    $table->is_downloadable(true);
-    $table->download_buttons();
-    $table->show_download_buttons_at(array(TABLE_P_BOTTOM));
-    $table->sortable(false);
-    $table->pageable(true);
-    if (isset($_COOKIE['wiziq_managecookie']) && empty($paging)) {
-               $wiziq_managecookie = $_COOKIE['wiziq_managecookie'];
-               $selected = $wiziq_managecookie;
-               $attendance_per_page = $wiziq_managecookie;
-    } else if (!(isset($_COOKIE['wiziq_managecookie'])) && empty($paging)) {
-        $attendance_per_page = WIZIQ_MAX_TABLE_SIZE;
-        $selected = "";
-    } else {
-        $attendance_per_page = $paging;
-        $selected = $paging;
+        $table = new flexible_table('attendenreport');
+        $table->define_columns(array('name', 'entry_time', 'exit_time',
+            'attended_minutes'));
+        $table->column_style_all('text-align', 'left');
+        $table->define_headers(array(get_string('attendee_name', 'wiziq'),
+            get_string('entry_time', 'wiziq'), get_string('exit_time', 'wiziq'),
+            get_string('attended_minutes', 'wiziq'),
+           ));
+        $table->define_baseurl($PAGE->url);
+        $table->is_downloadable(true);
+        $table->download_buttons();
+        $table->show_download_buttons_at(array(TABLE_P_BOTTOM));
+        $table->sortable(false);
+        $table->pageable(true);
+        if (isset($_COOKIE['wiziq_managecookie']) && empty($paging)) {
+                   $wiziq_managecookie = $_COOKIE['wiziq_managecookie'];
+                   $selected = $wiziq_managecookie;
+                   $attendance_per_page = $wiziq_managecookie;
+        } else if (!(isset($_COOKIE['wiziq_managecookie'])) && empty($paging)) {
+            $attendance_per_page = WIZIQ_MAX_TABLE_SIZE;
+            $selected = "";
+        } else {
+            $attendance_per_page = $paging;
+            $selected = $paging;
+        }
+        $attendelist = $attendancexmlch_attlist->attendee;
+        $total_attendence_record = count($attendelist);
+        $table->pagesize($attendance_per_page, $total_attendence_record);
+        $wiziq_attendence_file = get_string('attendence_file', 'wiziq');
+        $wiziq_attendence_file_heading = $wiziq_attendence_file." ".$course_number;
+        $attendance_class = get_string('wiziq_attendence_file', 'wiziq');
+        $wiziq_atendnc_filename = $attendance_class.$course_number;
+        $table->is_downloading($downloadattendence, $wiziq_atendnc_filename,
+            $wiziq_attendence_file_heading);
+        if (!$table->is_downloading()) {
+            $schedulenewwiziqclass = new moodle_url("$CFG->wwwroot/course/modedit.php",
+                    array('add' => 'wiziq', 'type' => '', 'course' => $course->id,
+                        'section' => '0', 'return' => '0'));
+            $navigationtabsmanage = new moodle_url("$CFG->wwwroot/mod/wiziq/index.php",
+                    array('id' =>  $course->id, 'sesskey' => sesskey()));
+            $navigationtabscontent = new moodle_url("$CFG->wwwroot/mod/wiziq/content.php",
+                    array('id' => $course->id, 'sesskey' => sesskey()));
+            $tabs =array();
+            $row = array();
+            $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass,
+                    get_string('schedule_class', 'wiziq'));
+            $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage,
+                    get_string('manage_classes', 'wiziq'));
+            $row[] = new tabobject('wizq_mange_content', $navigationtabscontent,
+                    get_string('manage_content', 'wiziq'));
+            $tabs[]=$row;
+            print_tabs($tabs);
+
+            $paging_option = new single_select($PAGE->url, "paging",
+                    array('5'=>'5', '10'=>'10', '15'=>'15', '20'=>'20'), $selected);
+
+            $paging_option->label = get_string('per_page_classes', 'wiziq');
+            echo $OUTPUT->render($paging_option);
+        }
+        $table->setup();
+        #-----naming of the table download file----------------
+        foreach ($attendelist as $value) {
+            $name = (string)$value->screen_name;
+
+            $date = $value->entry_time;
+            $date1 = new DateTime($date, new DateTimeZone('CST'));
+            $date1->setTimezone(new DateTimeZone('GMT-1'));
+            $actual_entry_time = date('Y-m-d h:i:s a', strtotime($date1->format('Y-m-d H:i:s'))); 
+
+            $date = $value->exit_time;
+            $date1 = new DateTime($date, new DateTimeZone('CST'));
+            $date1->setTimezone(new DateTimeZone('GMT-1'));
+            $actual_exit_time = date('Y-m-d h:i:s a', strtotime($date1->format('Y-m-d H:i:s'))); 
+
+            // $entry_time = (string)$value->entry_time;
+            // $actual_entry_time = wiziq_attendance_time($entry_time, $wiziqclass->id);
+            // $exit_time = (string)$value->exit_time;
+            // $actual_exit_time = wiziq_attendance_time($exit_time, $wiziqclass->id);
+            $attended_minutes = (string)$value->attended_minutes." "."Minutes";
+            $table->add_data(array($name, $actual_entry_time, $actual_exit_time, $attended_minutes));
+        }
+        $table->setup();
+        $table->finish_output();
     }
-    $attendelist = $attendancexmlch_attlist->attendee;
-    $total_attendence_record = count($attendelist);
-
-    $table->pagesize($attendance_per_page, $total_attendence_record);
-    $wiziq_attendence_file = get_string('attendence_file', 'wiziq');
-    $wiziq_attendence_file_heading = $wiziq_attendence_file." ".$course_number;
-    $attendance_class = get_string('wiziq_attendence_file', 'wiziq');
-    $wiziq_atendnc_filename = $attendance_class.$course_number;
-    $table->is_downloading($downloadattendence, $wiziq_atendnc_filename,
-        $wiziq_attendence_file_heading);
-    if (!$table->is_downloading()) {
-        $schedulenewwiziqclass = new moodle_url("$CFG->wwwroot/course/modedit.php",
-                array('add' => 'wiziq', 'type' => '', 'course' => $course->id,
-                    'section' => '0', 'return' => '0'));
-        $navigationtabsmanage = new moodle_url("$CFG->wwwroot/mod/wiziq/index.php",
-                array('id' =>  $course->id, 'sesskey' => sesskey()));
-        $navigationtabscontent = new moodle_url("$CFG->wwwroot/mod/wiziq/content.php",
-                array('id' => $course->id, 'sesskey' => sesskey()));
-        $tabs =array();
-        $row = array();
-        $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass,
-                get_string('schedule_class', 'wiziq'));
-        $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage,
-                get_string('manage_classes', 'wiziq'));
-        $row[] = new tabobject('wizq_mange_content', $navigationtabscontent,
-                get_string('manage_content', 'wiziq'));
-        $tabs[]=$row;
-        print_tabs($tabs);
-
-        $paging_option = new single_select($PAGE->url, "paging",
-                array('5'=>'5', '10'=>'10', '15'=>'15', '20'=>'20'), $selected);
-
-        $paging_option->label = get_string('per_page_classes', 'wiziq');
-        echo $OUTPUT->render($paging_option);
-    }
-    $table->setup();
-    #-----naming of the table download file----------------
-
-
-
-    foreach ($attendelist as $value) {
-        $name = (string)$value->screen_name;
-
-        $date = $value->entry_time;
-        $date1 = new DateTime($date, new DateTimeZone('CST'));
-        $date1->setTimezone(new DateTimeZone('GMT-1'));
-        $actual_entry_time = date('Y-m-d h:i:s a', strtotime($date1->format('Y-m-d H:i:s'))); 
-
-        $date = $value->exit_time;
-        $date1 = new DateTime($date, new DateTimeZone('CST'));
-        $date1->setTimezone(new DateTimeZone('GMT-1'));
-        $actual_exit_time = date('Y-m-d h:i:s a', strtotime($date1->format('Y-m-d H:i:s'))); 
-
-        // $entry_time = (string)$value->entry_time;
-        // $actual_entry_time = wiziq_attendance_time($entry_time, $wiziqclass->id);
-        // $exit_time = (string)$value->exit_time;
-        // $actual_exit_time = wiziq_attendance_time($exit_time, $wiziqclass->id);
-        $attended_minutes = (string)$value->attended_minutes." "."Minutes";
-        $table->add_data(array($name, $actual_entry_time, $actual_exit_time, $attended_minutes));
-    }
-    $table->setup();
-    $table->finish_output();
 }
 echo $OUTPUT->footer();

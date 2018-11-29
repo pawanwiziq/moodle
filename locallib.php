@@ -1253,7 +1253,9 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
 
         libxml_use_internal_errors(true);
         $attendancexml = new SimpleXMLElement($xmlreturn);
+        
         $attendancexml_status = $attendancexml->attributes();
+        
         if ($attendancexml_status == 'ok') {
             $attendancexmlch = $attendancexml->get_attendance_report;
             $attendancexmlch_status = $attendancexmlch->attributes();
@@ -1265,7 +1267,7 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
             $att = 'msg';
             $attribute = (string) $attendancexml->error->attributes()->$att;
             if ($attribute == 'No record found.') {
-                 $attribute = '<b>Course report is in progress. Please check after sometime.</b>';;
+                 $attribute = '<b>Course report is in progress. Please check after sometime.</b>';
             } else if ($attribute == 'Attendance report will be available soon.') {
                 $attribute = '<b>We are processing the information for the class. Attendance report will be available soon.</b>';
             }
@@ -1283,8 +1285,8 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
             );
             $event = \mod_wiziq\event\wiziq_classattendance::create($params);
             $event->trigger();
-           
-            print_error('1', '', '', $attribute);
+            //print_error('1', '', '', $attribute);
+            $errormsg = $attribute;
         }
     } catch (Exception $e) {
         if (property_exists($e, 'errorcode')) {
@@ -1757,15 +1759,19 @@ function wiziq_get_contentstatus($folderpath, $foldername, $courseid) {
  * @param string $timekey
  * @param string $hash
  */
+
 function wiziq_authentication(&$id, &$timekey, &$hash) {
     $timekey = time();
     $key = "key";
     $data = $id + $timekey;
-    $hash = wiziq_encrypt_hash($data, $key);
+    $action = 'encrypt';
+    //$hash = wiziq_encrypt_hash($data, $key);
+    $hash = wiziq_encrypt_decrypt($action, $data, $key);
+
 }
 
 /**
- * This encrypts the content that is uploaded,function is called from
+ * This encrypts/decrypt the content that is uploaded,function is called from
  * wiziq_authentication function.
  *
  * @param string $str
@@ -1773,34 +1779,25 @@ function wiziq_authentication(&$id, &$timekey, &$hash) {
  *
  * @return string $hashedvalue
  */
-function wiziq_encrypt_hash($str, $key) {
-    // Remove the base64 encoding from our key
-    $encryption_key = base64_decode($key);
-    // Generate an initialization vector
-    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-    // Encrypt the data using AES 256 encryption in CBC mode using our encryption key and initialization vector.
-    $encrypted = openssl_encrypt($str, 'aes-256-cbc', $encryption_key, 0, $iv);
-    // The $iv is just as important as the key for decrypting, so save it with our encrypted data using a unique separator (::)
-    $hashedvalue = base64_encode($encrypted . '::' . $iv);
-    return $hashedvalue;
-}
 
-/**
- * This decrypts the content that is uploaded
- *
- * @param string $strh
- * @param string $key
- *
- * @return string $var4
- */
-function wiziq_decrypt_hash($strh, $key) {
-     // Remove the base64 encoding from our key
-    $encryption_key = base64_decode($key);
-    // To decrypt, split the encrypted data from our IV - our unique separator used was "::"
-    list($encrypted_data, $iv) = explode('::', base64_decode($strh), 2);
-    return openssl_decrypt($encrypted_data, 'aes-256-cbc', $encryption_key, 0, $iv);
+function wiziq_encrypt_decrypt($action, $string, $key) {
+    $output = false;
+    $encrypt_method = "AES-256-CBC";
+    $secret_key = $key;
+    $secret_iv = $key.'cont_enc_dec';
+    // hash
+    $key = hash('sha256', $secret_key);
+    
+    // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+    $iv = substr(hash('sha256', $secret_iv), 0, 16);
+    if ( $action == 'encrypt' ) {
+        $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
+        $output = base64_encode($output);
+    } else if( $action == 'decrypt' ) {
+        $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+    }
+    return $output;
 }
-
 /**
  * Gets the class attendance time in particular timezone selected by user.
  * 

@@ -153,15 +153,17 @@ if (!$table->is_downloading()) {
 
 
 $cContext = context_course::instance($COURSE->id);
-$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
+$has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
+//$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
 
 
-
-    if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
+    // if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
+    if($has_cap_role){
         $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass, get_string('schedule_class', 'wiziq'));
     }
     $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage, get_string('manage_classes', 'wiziq'));
-    if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
+    //if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
+    if($has_cap_role){
         $row[] = new tabobject('wizq_mange_content', $navigationtabscontent, get_string('manage_content', 'wiziq'));
     }
     $tabs[] = $row;
@@ -527,6 +529,3 @@ foreach ($scheduleclass as $wiziq) {
 $table->setup();
 $table->finish_output();
 echo $OUTPUT->footer();
-
-?>
-

@@ -87,4 +87,3 @@ if ($type == 'download') {
   $permarecored->time = "$date";
   $DB->insert_record('recording_details', $permarecored);
 }
-?>

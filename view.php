@@ -81,13 +81,13 @@ $row = array();
 
 
 $cContext = context_course::instance($COURSE->id);
-$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
+//$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
+$has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
 
 $emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
 $eailnotify = $emailnotification->value;
-   
-                  
-                    
+
+
 //------- Get details of the class---
 $class_id = $wiziq->class_id;
 $class_master_id = $wiziq->class_master_id;
@@ -135,11 +135,13 @@ $create_recording = "false";
   $tabs =array();
     $row = array();
      
-if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+//if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+if ($has_cap_role){
     $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass, get_string('schedule_class', 'wiziq'));
 }
 $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage, get_string('manage_classes', 'wiziq'));
-if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+//if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+if ($has_cap_role){
     $row[] = new tabobject('wizq_mange_content', $navigationtabscontent, get_string('manage_content', 'wiziq'));
 }
 $tabs[] = $row;
@@ -457,7 +459,7 @@ if ($session == -1) {
 
 $attendencereport = html_writer::link(
                 new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $wiziq->course, 'classid' => $wiziq->class_id,
-            'sesskey' => sesskey())), get_string('attendencereport', 'wiziq'));
+            'sesskey' => sesskey(),'cmid' => $cm->id)), get_string('attendencereport', 'wiziq'));
 $buttonrowcell_9 = new html_table_cell();
 $buttonrowcell_9->text = $attendencereport;
 $buttonrowcell_9_style = 'text-align:center; border:0;margin-top:12px; float:left';
