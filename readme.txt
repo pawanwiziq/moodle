@@ -31,7 +31,7 @@ OR
 PS if you are old WizIQ plugin user it is advised to take backup of all the data before installation.
 
 **********************************************
-Wiziq Capabilities for Moodle 3.6
+Wiziq Capabilities for Moodle 3.3
 **********************************************
 1. Notification / reminders emails from Plugin.
 2. All class [Single / Recurring ] options inside a single plugin.
