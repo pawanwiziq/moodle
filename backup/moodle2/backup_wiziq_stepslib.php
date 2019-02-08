@@ -59,18 +59,18 @@ class backup_wiziq_activity_structure_step extends backup_activity_structure_ste
                       'userid', 'uploadtime', 'contentid', 'old_content_id', 'cid_change_status',
                       'status', 'wcid'));
 
-        $download_details = new backup_nested_element('download_details');
-        $download_details = new backup_nested_element('download_details', array('id'),
+        $wiziq_download_details = new backup_nested_element('wiziq_download_details');
+        $wiziq_download_details = new backup_nested_element('wiziq_download_details', array('id'),
                 array('class_id', 'username', 'time'));
 
-        $recording_details = new backup_nested_element('recording_details');
-        $recording_details = new backup_nested_element('recording_details', array('id'),
+        $wiziq_recording_details = new backup_nested_element('wiziq_recording_details');
+        $wiziq_recording_details = new backup_nested_element('wiziq_recording_details', array('id'),
                 array('class_id', 'username', 'time'));
 
         $wiziq->add_child($event);
         $wiziq->add_child($usercontents);
-        $wiziq->add_child($download_details);
-        $wiziq->add_child($recording_details);
+        $wiziq->add_child($wiziq_download_details);
+        $wiziq->add_child($wiziq_recording_details);
         $usercontents->add_child($usercontent);
         // Define sources
         $wiziq->set_source_table('wiziq', array('id' => backup::VAR_ACTIVITYID));
@@ -80,10 +80,10 @@ class backup_wiziq_activity_structure_step extends backup_activity_structure_ste
             $usercontent->set_source_sql('SELECT * FROM {wiziq_content} where course = ?',
                                          array('course' => backup::VAR_COURSEID));
         }
-        $download_details->set_source_sql('SELECT * FROM {download_details}',
-                                         array('classid' => backup::VAR_CLASSID));
-        $recording_details->set_source_sql('SELECT * FROM {recording_details}',
-                                         array('classid' => backup::VAR_CLASSID));
+        // $wiziq_download_details->set_source_sql('SELECT * FROM {wiziq_download_details}',
+        //                                  array('classid' => backup::VAR_CLASSIDID));
+        // $wiziq_recording_details->set_source_sql('SELECT * FROM {wiziq_recording_details}',
+        //                                  array('classid' => backup::VAR_CLASSIDID));
         // Define id annotations
         $usercontent->annotate_ids('user', 'userid');
         // Define file annotations
