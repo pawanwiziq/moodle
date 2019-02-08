@@ -51,9 +51,10 @@ define('WIZIQ_DEFAULT_PAGESIZE', 20);
  */
 function wiziq_scheduleclass($wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $presenter_id, $presenter_name, $wiziq_datetime, $wiziqtimezone, $class_duration, $vc_language, $recording, $courseid, $intro, &$attribnode, &$wiziqclass_id, &$errormsg, &$view_recording_url , &$presenter_url) {
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -80,6 +81,7 @@ function wiziq_scheduleclass($wiziq_secretacesskey, $wiziq_access_key, $wiziq_we
         $objdom = new SimpleXMLElement($xmlreturn, LIBXML_NOCDATA);
        // echo "<pre>";
        // print_r($objdom);
+       // die();
         $attribnode = (string) $objdom->attributes();
         if ($attribnode == "ok") {
             $class_detaial = $objdom->create->class_details;
@@ -162,7 +164,8 @@ function wiziq_getteacherdetail($courseid) {
  */
 function wiziq_languagexml() {
     global $CFG;
-    $wiziq_vc_language = $CFG->wiziq_vc_language;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_vc_language = $cfgrtn->wiziq_vc_language;
     $xmlpathtoping = $wiziq_vc_language;
     $curl = new curl();
     if ($curl) {
@@ -199,7 +202,8 @@ function wiziq_languagexml() {
 function wiziq_timezone() {
     //TODO:keep this in setting.php
     global $CFG;
-    $wiziq_timezone = $CFG->wiziq_timezone;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_timezone = $cfgrtn->wiziq_timezone;
     $xmlpathtoping = $wiziq_timezone; //$xmlPath
     $curl = new curl();
     if ($curl) {
@@ -267,10 +271,10 @@ function wiziq_converttime($timestamp, $timezonerequired) {
 function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, &$presenter_name, &$presenter_url, &$start_time, &$time_zone, &$create_recording, &$status, &$language_culture_name, &$duration, &$recording_url) {
     global $CFG , $USER;
 
-
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -291,6 +295,7 @@ function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, 
         $objdom = new SimpleXMLElement($xmlreturn, LIBXML_NOWARNING);
       
         $attribnode = $objdom->attributes();
+        
         if ($attribnode == "ok") {
 
             $get_data = $objdom->get_data->record_list->record; 
@@ -326,7 +331,7 @@ function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, 
             );
             $event = \mod_wiziq\event\wiziq_classdetail::create($params);
             $event->trigger();
-            echo $OUTPUT->notification($e->getMessage()."<br/>".$errormsg);
+            // echo $OUTPUT->notification($e->getMessage()."<br/>".$errormsg);
          
         }
         } catch (Exception $e) {
@@ -355,9 +360,10 @@ function wiziq_get_data($courseid, $class_id, $class_master_id, &$presenter_id, 
  */
 function wiziq_get_data_attendee($class_id, $attendee_id, &$attendee_url , $courseid) {
     global $CFG ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $context = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -404,9 +410,10 @@ function wiziq_get_data_manage($courseid, $classids , &$classtatus ,&$presenter_
     
  
     global $CFG, $DB, $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
       $context = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -524,9 +531,10 @@ function wiziq_get_data_manage($courseid, $classids , &$classtatus ,&$presenter_
  */
 function wiziq_addattendee($courseid, $class_id, $attendee_id, $attendee_screen_name, $language_culture_name, &$attendee_url, &$errormsg) {
     global $CFG,  $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $context = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -601,9 +609,10 @@ function wiziq_addattendee($courseid, $class_id, $attendee_id, $attendee_screen_
  */
 function wiziq_delete_class($courseid, $class_id) {
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;  
+    $wiziq_webserviceurl =  $cfgrtn->wiziq_webserviceurl;
      $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -678,9 +687,10 @@ function wiziq_delete_class($courseid, $class_id) {
  */
 function wiziq_modifyclass($courseid, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $class_id, $title, $presenter_id, $presenter_name, $wiziq_datetime, $wiziqtimezone, $class_duration, $vc_language, $recording, $intro, &$attribnode, &$errormsg) {
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
      $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -754,10 +764,10 @@ function wiziq_get_data_manageperma($courseid, $wiziq_classmasterid_array, &$wiz
 
    
     global $CFG, $DB, $wiziq_classidperma , $USER , $OUTPUT;
-
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl =  $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -872,10 +882,10 @@ function wiziq_get_data_managepermaview($courseid, $wiziq_classmasterid_array, &
 
     //print_r($wiziq_classmasterid_array);
     global $CFG, $DB, $wiziq_classidperma1, $wiziq_recordlink , $USER ,$OUTPUT;
-
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl =  $cfgrtn->wiziq_webserviceurl;
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
     $method = "view_schedule";
@@ -964,9 +974,11 @@ function wiziq_get_data_managepermaview($courseid, $wiziq_classmasterid_array, &
 function wiziq_downloadrecording($courseid, $class_id, &$download_recording_link, &$errormsg, $abcdd) {
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $context = context_course::instance($courseid);  
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1237,9 +1249,10 @@ function wiziq_download_recording($courseid, $class_id, $status_xml_path, &$down
 function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$attendancexmlch_dur, &$attendancexmlch_attlist) {
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);  
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1322,9 +1335,10 @@ function wiziq_getattendancereport($courseid, $class_id, $id, &$errormsg, &$atte
 function wiziq_create_folder($courseid, $folderpath, $foldername) {
     global $CFG, $USER, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice =  $cfgrtn->wiziq_content_webservice;
     $coursecontext = context_course::instance($courseid);
     $requestparameters = array();
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1406,9 +1420,10 @@ function wiziq_create_folder($courseid, $folderpath, $foldername) {
 function wiziq_content_upload($courseid, $filetitle, $file, $folderpath) {
     global $CFG, $USER, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice = $cfgrtn->wiziq_content_webservice;
     $coursecontext = context_course::instance($courseid);
     $requestparameters = array();
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1563,9 +1578,10 @@ function wiziq_content_upload($courseid, $filetitle, $file, $folderpath) {
 function wiziq_content_delete($courseid, $contentid) {
     global $CFG, $USER, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice = $cfgrtn->wiziq_content_webservice;
      $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1657,9 +1673,10 @@ function wiziq_content_delete($courseid, $contentid) {
 function wiziq_delete_folder($courseid, $foldername, $folderpath) {
     global $CFG, $USER, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice = $cfgrtn->wiziq_content_webservice;
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
     $method = "delete_folder";
@@ -1702,9 +1719,10 @@ function wiziq_delete_folder($courseid, $foldername, $folderpath) {
 function wiziq_get_contentstatus($folderpath, $foldername, $courseid) {
     global $CFG, $USER, $DB, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice =$cfgrtn->wiziq_content_webservice;
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
     $method = "list";
@@ -1844,9 +1862,10 @@ function wiziq_attendance_time($entry_time, $wiziqclassid) {
  */
 function wiziq_get_data_by_sessioncode($courseid, $sessioncode, &$class_id, $wiziq_id, &$presenter_id, &$presenter_name, &$presenter_url, &$start_time, &$time_zone, &$create_recording, &$status, &$language_culture_name, &$duration, &$recording_url) {
     global $CFG, $DB ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
       $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -1937,9 +1956,10 @@ function wiziq_get_data_by_sessioncode($courseid, $sessioncode, &$class_id, $wiz
  */
 function wiziq_get_data_by_sessioncode_manage($courseid, $sessioncodes) {
     global $CFG, $DB ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -2033,9 +2053,10 @@ function wiziq_get_data_by_sessioncode_manage($courseid, $sessioncodes) {
  */
 function wiziq_get_data_by_sessioncode_delete($wiziq_id, $courseid, $sessioncode, &$class_id) {
     global $CFG, $DB ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
     $method = "get_data_by_sessionCodes";
@@ -2078,9 +2099,10 @@ function wiziq_get_data_by_sessioncode_delete($wiziq_id, $courseid, $sessioncode
 function wiziq_get_contentid_update($courseid, $clist_array) {
     global $CFG, $USER, $DB, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_content_webservice;
     require_once("authbase.php");
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_content_webservice = $CFG->wiziq_content_webservice;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_content_webservice = $cfgrtn->wiziq_content_webservice;
      $context = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -2156,9 +2178,10 @@ function wiziq_get_contentid_update($courseid, $clist_array) {
 function wiziq_createPerma($wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $presenter_id, $presenter_name, $vc_language, $create_recording, $attendee_limit, $courseid, &$attribnode, $wiziqclass_id, &$errormsg, &$class_master_id, &$common_perma_attendee_url, &$view_recording_url, $wiziq_datetime, $wiziqtimezone, $class_duration, $intro) {
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl ,$USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -2270,10 +2293,10 @@ function wiziq_createPerma($wiziq_secretacesskey, $wiziq_access_key, $wiziq_webs
  */
 function wiziq_addattendeeperma($courseid, $class_master_id, $attendee_id, $attendee_screen_name, $language_culture_name, $perma_class, &$attendee_url, &$errormsg) {
     global $CFG , $DB , $USER;
-
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
     $context = context_course::instance($courseid);
     require_once("authbase.php");
 
@@ -2357,10 +2380,10 @@ function wiziq_addattendeeperma($courseid, $class_master_id, $attendee_id, $atte
 function wiziq_modifypermaclass($courseid, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $presenter_id, $presenter_name, $perma_class, $vc_language, $create_recording, $attendee_limit, &$attribnode, $wiziqclass_id, &$errormsg, &$class_master_id, &$common_perma_attendee_url, &$view_recording_url, $wiziq_datetime, $wiziqtimezone, $class_duration) {
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
 
-
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_webserviceurl =  $cfgrtn->wiziq_webserviceurl;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
      $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -2435,9 +2458,10 @@ function wiziq_delete_permaclass($courseid, $class_master_id, $permaclass) {
 
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl , $USER;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_webserviceurl =  $cfgrtn->wiziq_webserviceurl;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
     // $wiziq_access_key = "eMmJoNlEPoY=";
     //$wiziq_secretacesskey = "23GQMUxQ/QMBiqYIWtogNg==";
     require_once("authbase.php");
@@ -2480,9 +2504,10 @@ function wiziq_delete_permaclass($courseid, $class_master_id, $permaclass) {
 function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $monthly_date, $days_of_week, $specific_week, &$wiz_start_time, &$wiziq_presenter_link, $time_zone, $duration, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $start_time, $class_repeat_type, $class_occurrence, $class_end_date, $language_culture_name, $courseid, $intro, $presenter_id, $presenter_name, $recording, &$attribnode, &$wiziqmasterclass_id, &$wiziqclass_id, &$errormsg, &$view_recording_url) {
 
     global $CFG, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $USER;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     $coursecontext = context_course::instance($courseid);
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
@@ -2589,10 +2614,10 @@ function wiziq_create_recuring($select_monthly_repeat_type, $class_schedule, $mo
 function wiziq_view_recur_class($courseid, $wiziq_classmasterid_array, &$wiziq_classidmaster, &$wiziq_recordlink, &$wiziq_presenter_link, &$wiz_start_time) {
     
     global $CFG , $USER;
-
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
     require_once("authbase.php");
     $wiziq_authbase = new wiziq_authbase($wiziq_secretacesskey, $wiziq_access_key);
     $method = "view_schedule";

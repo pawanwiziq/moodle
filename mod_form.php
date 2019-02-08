@@ -67,35 +67,33 @@ class mod_wiziq_mod_form extends moodleform_mod {
         $table_html_p2 = '<th>' . $navigation_tabs_manage . '</th><th>|</th>';
         $table_html_p3 = '<th>' . $navigation_tabs_content . '</th>';
         $table_html = $table_html_p1 . $table_html_p2 . $table_html_p3;
-        $update = optional_param('update',null,PARAM_INT);
+        $update = optional_param('update',null,PARAM_INT);   
         $allrecord = $DB->get_record('course_modules', array('id' => $update));
         $allrecord1 = $DB->get_record('wiziq', array('id' => $allrecord->instance));
+      
          // $PAGE->requires->jquery();
-    
-
-        /*         * *************Check case for edit section START ***************** */
-
-
-        
-        
+        /*         * *************Check case for edit section START ***************** */  
+            
         if (isset($update)) {
 
             if ($allrecord1->insescod == -1) {
+                
                 ?>               
                 <script type="text/javascript">
                     $(document).ready(function() { // permanent class selected
                         $('#id_class_type_0').prop('checked', true);
                         $('#id_class_type_1').attr('disabled', true);
-                        $('#id_class_type_2').attr('disabled', true);
+                       $('#id_class_type_2').attr('disabled', true);
                         $("#id_wiziqdatetimesetting").hide();
                     });
                 </script>
             <?php } elseif (($allrecord1->class_id != 0) && ($allrecord1->class_master_id == 0)) { ?>              
                 <script type="text/javascript">
                     $(document).ready(function() { // schedule class selected
+                        alert("hiiii");
                         $('#id_class_type_1').attr('checked', true);
                         $('#id_class_type_0').attr('disabled', true);
-                        $('#id_class_type_2').attr('disabled', true);
+                        ($('#id_class_type_2').attr('disabled', true);
                         $("#id_wiziqdatetimesetting").show();
                     });
                 </script>
@@ -121,6 +119,7 @@ class mod_wiziq_mod_form extends moodleform_mod {
                     });
                 </script>
                 <?php
+
 
             }
             if ($allrecord1->class_schedule == '4') { // end date is selected

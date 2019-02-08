@@ -154,15 +154,12 @@ if (!$table->is_downloading()) {
 
 $cContext = context_course::instance($COURSE->id);
 $has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
-//$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
 
-
-    // if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
     if($has_cap_role){
         $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass, get_string('schedule_class', 'wiziq'));
     }
     $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage, get_string('manage_classes', 'wiziq'));
-    //if ((is_siteadmin()) || ($wiziqs[0]->presenter_id == $USER->id) || $isStudent !=1) {
+
     if($has_cap_role){
         $row[] = new tabobject('wizq_mange_content', $navigationtabscontent, get_string('manage_content', 'wiziq'));
     }
@@ -367,7 +364,7 @@ foreach ($permaclass as $wiziq) {
         if ($wiziq_expired && $wiziq_upcoming && $wiziq_deletedformwiziq) {
             if (has_capability('mod/wiziq:view_attendance_report', $wiziqmodulecontext)) {
                 $attendencereport = html_writer::link(
-                                new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $id, 'classid' => $newwiziq->class_id, 'sesskey' => sesskey())), get_string('attendencereport', 'wiziq'));
+                                new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $id, 'classid' => $newwiziq->class_id, 'sesskey' => sesskey() ,  'cmid' => $wiziq->coursemodule)), get_string('attendencereport', 'wiziq'));
             } else {
                 $attendencereport = get_string('nocapability', 'wiziq');
             }
@@ -506,7 +503,7 @@ foreach ($scheduleclass as $wiziq) {
         if ($wiziq_expired && $wiziq_upcoming && $wiziq_deletedformwiziq) {
             if (has_capability('mod/wiziq:view_attendance_report', $wiziqmodulecontext)) {
                 $attendencereport = html_writer::link(
-                                new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $id, 'classid' => $newwiziq->class_id, 'sesskey' => sesskey())), get_string('attendencereport', 'wiziq'));
+                                new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $id, 'classid' => $newwiziq->class_id, 'sesskey' => sesskey() , 'cmid' => $wiziq->coursemodule)), get_string('attendencereport', 'wiziq'));
             } else {
                 $attendencereport = get_string('nocapability', 'wiziq');
             }

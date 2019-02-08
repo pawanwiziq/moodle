@@ -36,6 +36,7 @@ $id = required_param('id', PARAM_INT);   // course
 $class_id = required_param('classid', PARAM_INT);   // wiziq_class_id
 $downloadattendence = optional_param('download', '', PARAM_ALPHANUMEXT);
 $paging = optional_param('paging', '', PARAM_INT);
+$cmid = optional_param('cmid', '', PARAM_INT);
 confirm_sesskey();
 #------setting paging as cookie in order to have paging when page number is changed-------
 if (!empty($paging)) {
@@ -47,7 +48,9 @@ $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 $wiziqclass = $DB->get_record('wiziq',
 array('class_id' => $class_id, 'course' => $id), '*', IGNORE_MULTIPLE);
 require_course_login($course);
-
+$cm = get_coursemodule_from_id('wiziq', $cmid, 0, false, MUST_EXIST);
+$context = context_module::instance($cm->id);
+require_capability('mod/wiziq:download_attendance_report', $context);
 $coursecontext = context_course::instance($course->id);
 $noerror = get_string('noerror','wiziq');
 $params = array(
@@ -78,8 +81,7 @@ wiziq_getattendancereport($id, $class_id, $id, $errormsg, $attendancexmlch_dur, 
 if($errormsg){
     print_error($errormsg);
 }else{
-    $cm = get_coursemodule_from_id('wiziq', $id, 0, false, MUST_EXIST);
-    $context = context_module::instance($cm->id);
+
     $PAGE->set_context($context);
 
     #------- Creation of table starts------

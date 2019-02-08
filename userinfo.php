@@ -116,8 +116,6 @@ $cContext = context_course::instance($COURSE->id);
 
 $has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
 
-//$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
-
 if ($has_cap_role) {
     $table->setup();
 
@@ -126,10 +124,10 @@ if ($has_cap_role) {
 
     if(optional_param('type',null,PARAM_ALPHANUMEXT) == 'downlod')
     {
-    $userinfo = $DB->get_records('download_details' , array('class_id' => $userid->id));
+    $userinfo = $DB->get_records('wiziq_download_details' , array('class_id' => $userid->id));
     }
     else{
-    $userinfo = $DB->get_records('recording_details' , array('class_id' => $userid->id));
+    $userinfo = $DB->get_records('wiziq_recording_details' , array('class_id' => $userid->id));
     }
 
     foreach ($userinfo as $value) {
