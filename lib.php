@@ -72,9 +72,11 @@ function wiziq_supports($feature) {
 function wiziq_add_instance(stdClass $wiziq, mod_wiziq_mod_form $mform = null) {
 
     global $CFG, $DB, $USER;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
+    
+    $cfgrtn = get_config('wiziq');
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
     $coursecontext = context_course::instance($wiziq->course);
 
     $isadmin = get_admins();
@@ -131,8 +133,7 @@ function wiziq_add_instance(stdClass $wiziq, mod_wiziq_mod_form $mform = null) {
         }
     }
 
-  $emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
-  $eailnotify = $emailnotification->value;
+  $eailnotify = get_config('wiziq','wiziq_emailsetting');
     #-----Schedule class
     if ($wiziq->class_type == 1) {
 
@@ -558,9 +559,10 @@ function wiziq_update_instance($wiziq) {
 
 
     global $CFG, $DB, $USER;
-    $wiziq_webserviceurl = $CFG->wiziq_webserviceurl;
-    $wiziq_access_key = $CFG->wiziq_access_key;
-    $wiziq_secretacesskey = $CFG->wiziq_secretacesskey;
+    $cfgrtn = get_config('wiziq');
+    $wiziq_webserviceurl = $cfgrtn->wiziq_webserviceurl;
+    $wiziq_access_key = $cfgrtn->wiziq_access_key;
+    $wiziq_secretacesskey = $cfgrtn->wiziq_secretacesskey;
     $class_id = $wiziq->class_id;
     $wiziq->lasteditorid = $USER->id;
      $coursecontext = context_course::instance($wiziq->course);
@@ -638,9 +640,9 @@ function wiziq_update_instance($wiziq) {
             $recording = "false";
         }
 
-          $emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
-          $eailnotify = $emailnotification->value;
         
+        $eailnotify = get_config('wiziq','wiziq_emailsetting');
+
         if ($wiziq->class_type == 0) {
             $alldata = $DB->get_record_sql('SELECT * FROM {wiziq} WHERE id = ?', array($wiziq->id));
           
@@ -671,6 +673,7 @@ function wiziq_update_instance($wiziq) {
 
             wiziq_modifypermaclass($wiziq->course, $wiziq_secretacesskey, $wiziq_access_key, $wiziq_webserviceurl, $title, $presenter_id, $presenter_name, $vc_language, $attendee_limit, $create_recording, $courseid, $attribnode, $wiziqclass_id, $errormsg, $class_master_id, $common_perma_attendee_url, $view_recording_url, $wiziq_datetime, $wiziqtimezone, $class_duration, $intro);
 
+            
 
             if ($attribnode == "ok") {
 
@@ -843,7 +846,7 @@ function wiziq_update_instance($wiziq) {
                 $DB->update_record('wiziq', $wiziq);
                 $event = new stdClass();
                 $event->id = $DB->get_field('event', 'id', array('modulename' => 'wiziq', 'instance' => $wiziq->id));
-
+            
                 if ($event->id) {
 
                     $event->name = format_string($wiziq->name);
@@ -865,6 +868,7 @@ function wiziq_update_instance($wiziq) {
         }
     } else {
         print_error("error in case of expired class");
+        
     }
 }
 
@@ -893,8 +897,7 @@ function wiziq_delete_instance($id) {
         return false;
     }
 
-  $emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
-          $eailnotify = $emailnotification->value;
+    $eailnotify = get_config('wiziq','wiziq_emailsetting');
 
     foreach ($events as $event) {
         $event = calendar_event::load($event);

@@ -31,15 +31,15 @@ OR
 PS if you are old WizIQ plugin user it is advised to take backup of all the data before installation.
 
 **********************************************
-Wiziq Capabilities for Moodle 3.4
+Wiziq Capabilities for Moodle 3.6
 **********************************************
 1. Notification / reminders emails from Plugin.
 2. All class [Single / Recurring ] options inside a single plugin.
 3. View / download Recording stats
 4. Content Upload : At Course level.
-5. Download recording : At module level. 
-6. View recording : At module level.
-7. View Attendance report : At module level.
+2. Download recording : At module level. 
+3. View recording : At module level.
+4. View Attendance report : At module level.
 
 Note:-
 libxml_use_internal_errors(true); // This function is used to hide the warning if the xml is not parsed, we have used this function in the try catch block so if any exception occurs it will be caught in the catch block. The exception in try block regarding the xml will only come if no xml or ill-framed xml is recieved form wiziq.

@@ -49,7 +49,7 @@ if ($type == 'download') {
   $downloaddetails->username = "$name";
   $downloaddetails->class_id = $id;
   $downloaddetails->time = "$date";
-  $DB->insert_record('download_details', $downloaddetails);
+  $DB->insert_record('wiziq_download_details', $downloaddetails);
     
 } else if ($type == 'recording') {
     $record = new stdClass();
@@ -61,7 +61,7 @@ if ($type == 'download') {
   $recorddetails->username = "$name";
   $recorddetails->class_id = $id;
   $recorddetails->time = "$date";
-  $DB->insert_record('recording_details', $recorddetails);
+  $DB->insert_record('wiziq_recording_details', $recorddetails);
   
 } else if ($type == 'perma_download') {
     $perma_download = new stdClass();
@@ -73,7 +73,7 @@ if ($type == 'download') {
   $permadownload->username = "$name";
   $permadownload->class_id = $id;
   $permadownload->time = "$date";
-  $DB->insert_record('download_details', $permadownload);
+  $DB->insert_record('wiziq_download_details', $permadownload);
     
 } else if ($type == 'record_view') {
     $view_record = new stdClass();
@@ -85,6 +85,5 @@ if ($type == 'download') {
   $permarecored->username = "$name";
   $permarecored->class_id = $id;
   $permarecored->time = "$date";
-  $DB->insert_record('recording_details', $permarecored);
+  $DB->insert_record('wiziq_recording_details', $permarecored);
 }
-?>

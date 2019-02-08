@@ -62,6 +62,7 @@ $folder_exists = $DB->get_record('wiziq_content', array('id' => $folderid), '*',
 require_course_login($course);
 //add_to_log($course->id, 'wiziq', 'view all', 'index.php?id='.$course->id, '');
 $coursecontext = context_course::instance($course->id);
+require_capability('mod/wiziq:wiziq_content_upload',$coursecontext);
 $url = new moodle_url('/mod/wiziq/content.php', array('id'=>$id, 'sesskey' => sesskey()));
 $PAGE->set_url($url);
 $pagetitle = new stdClass();

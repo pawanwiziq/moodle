@@ -129,16 +129,15 @@ class wiziq_httprequest {
      */
     public function wiziq_do_post_request($url, $data, $optional_headers = null) {
         try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url );
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_VERBOSE, 1 );
-            $response = curl_exec($ch);
-            return $response;
-            // close cURL resource, and free up system resources
-            curl_close($ch);
+            $curl = new curl();
+            $options = array(
+                'CURLOPT_HEADER' => false,
+                'CURLOPT_POST' => true,
+                'CURLOPT_RETURNTRANSFER' => true,
+                'CURLOPT_VERBOSE' => true,
+            );
+            $ress = $curl->post($url, $data, $options);
+            return $ress;
         } catch (Exception $e) {
             $errorexecption = $e->getMessage();
             $errormsg = get_string('errorinservice', 'wiziq'). " " . $errorexecption;

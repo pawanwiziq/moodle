@@ -113,29 +113,30 @@ if (!$table->is_downloading()) {
     echo $OUTPUT->render($paging_option);
 }
 $cContext = context_course::instance($COURSE->id);
-$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
 
-if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
-$table->setup();
+$has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
 
-$classid = optional_param('classid',null,PARAM_INT);
-$userid = $DB->get_record('wiziq' , array('class_id' => $classid));
+if ($has_cap_role) {
+    $table->setup();
 
-if(optional_param('type',null,PARAM_ALPHANUMEXT) == 'downlod')
-{
-$userinfo = $DB->get_records('download_details' , array('class_id' => $userid->id));
-}
-else{
-$userinfo = $DB->get_records('recording_details' , array('class_id' => $userid->id));
-}
+    $classid = optional_param('classid',null,PARAM_INT);
+    $userid = $DB->get_record('wiziq' , array('class_id' => $classid));
 
-foreach ($userinfo as $value) {
-    $name = (string)$value->username;
-    $entry_time = (string)$value->time;
-    $table->add_data(array($name, $entry_time));
-}
+    if(optional_param('type',null,PARAM_ALPHANUMEXT) == 'downlod')
+    {
+    $userinfo = $DB->get_records('wiziq_download_details' , array('class_id' => $userid->id));
+    }
+    else{
+    $userinfo = $DB->get_records('wiziq_recording_details' , array('class_id' => $userid->id));
+    }
 
-$table->setup();
+    foreach ($userinfo as $value) {
+        $name = (string)$value->username;
+        $entry_time = (string)$value->time;
+        $table->add_data(array($name, $entry_time));
+    }
+
+    $table->setup();
 } else {
     
     echo "<h3>You are not authourized to access this page. </h3>";

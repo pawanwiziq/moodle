@@ -29,14 +29,17 @@ define('WIZIQ_WIDTH', 1024);
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 global $CFG, $USER, $OUTPUT, $PAGE;
+
 $id = optional_param('id', 0, PARAM_INT); // course_module ID
+
 // wiziq instance ID - it should be named as the first character of the module
 $w = optional_param('w', 0, PARAM_INT);
 if ($id) {
-    $cm = get_coursemodule_from_id('wiziq', $id, 0, false, MUST_EXIST);
+    $cm = get_coursemodule_from_id('wiziq', $id, 0, false, MUST_EXIST);   
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
     $wiziq = $DB->get_record('wiziq', array('id' => $cm->instance), '*', MUST_EXIST);
 } else if ($w) {
+
     $wiziq = $DB->get_record('wiziq', array('id' => $w), '*', MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $wiziq->course), '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('wiziq', $wiziq->id, $course->id, false, MUST_EXIST);
@@ -81,13 +84,11 @@ $row = array();
 
 
 $cContext = context_course::instance($COURSE->id);
-$isStudent = current(get_user_roles($cContext, $USER->id))->shortname=='student'? true : false;
 
-$emailnotification = $DB->get_record_sql('SELECT * FROM {config} WHERE name = ?', array('wiziq_emailsetting'));
-$eailnotify = $emailnotification->value;
-   
-                  
-                    
+$has_cap_role = has_capability('mod/wiziq:administration_role', $cContext);
+
+$eailnotify = get_config('wiziq','wiziq_emailsetting');
+
 //------- Get details of the class---
 $class_id = $wiziq->class_id;
 $class_master_id = $wiziq->class_master_id;
@@ -135,11 +136,12 @@ $create_recording = "false";
   $tabs =array();
     $row = array();
      
-if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+if ($has_cap_role){
     $row[] = new tabobject('wiziq_sch_class', $schedulenewwiziqclass, get_string('schedule_class', 'wiziq'));
 }
 $row[] = new tabobject('wizq_mange_class', $navigationtabsmanage, get_string('manage_classes', 'wiziq'));
-if ((is_siteadmin()) || ($presenter_id == $USER->id) || $isStudent !=1) {
+
+if ($has_cap_role){
     $row[] = new tabobject('wizq_mange_content', $navigationtabscontent, get_string('manage_content', 'wiziq'));
 }
 $tabs[] = $row;
@@ -396,7 +398,6 @@ if (is_array($download_recording_link)) {
 #-----code to delete the class------
 
 if ($session == -1) {
-     
     $presenter_id = $wiziq->presenter_id;
    
     if ($presenter_id == $USER->id) {
@@ -443,8 +444,6 @@ if ($session == -1) {
         $buttonrowcell_3->style = $buttonrowcell_3_style;
     }
 } else {
-
-  
     $deleteclass = html_writer::link(
                     new moodle_url("$CFG->wwwroot/course/mod.php", array('delete' => $cm->id, 'return' => true, 'sesskey' => sesskey())), get_string('delete_class', 'wiziq'));
     $buttonrowcell_3 = new html_table_cell();
@@ -457,7 +456,7 @@ if ($session == -1) {
 
 $attendencereport = html_writer::link(
                 new moodle_url("$CFG->wwwroot/mod/wiziq/attendancereport.php", array('id' => $wiziq->course, 'classid' => $wiziq->class_id,
-            'sesskey' => sesskey())), get_string('attendencereport', 'wiziq'));
+            'sesskey' => sesskey(),'cmid' => $cm->id)), get_string('attendencereport', 'wiziq'));
 $buttonrowcell_9 = new html_table_cell();
 $buttonrowcell_9->text = $attendencereport;
 $buttonrowcell_9_style = 'text-align:center; border:0;margin-top:12px; float:left';
